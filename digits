@@ -1,0 +1,71 @@
+#준비과정
+import sklearn
+
+import matplotlib.pyplot as plt
+
+#데이터셋, 분류모델등 불러옴
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+#svm 분류모델을 로드, 'from sklearn.tree import DecisionTreeClassifier'으로 의사결정나무 불러올 수 있음
+# decision_tree = DecisionTreeClassifier(random_state=32) : 분류기에 x,y훈련 데이터 넣어 훈련
+# y_pred = decision_tree.predict(X_test) : 훈련된 분류모델에 테스트데이터셋을 넣어 예측치확인
+# 사이킷런에서는 다양한 분류모델을 코드 몇줄로 쉽게 적용가능
+from sklearn import datasets, svm, metrics
+
+digits = datasets.load_digits()
+
+#이미지가 64개의 픽셀, 8x8의 픽셀로 구성
+digits_data = digits.data
+digits_data.shape
+digits_data[0]
+
+digits_label = digits.target # 각 이미지가 나타내는 숫자를 의미합니다.
+print(digits_label.shape)
+digits_label[:20]
+
+#트레인샘플 시각화
+_, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
+for ax, image, label in zip(axes, digits.images, digits.target):
+    ax.set_axis_off()
+    ax.imshow(image, cmap=plt.cm.gray_r, interpolation="nearest")
+    ax.set_title("Training: %i" % label)
+
+#이미지컬러를 평탄화하여 분류classification에 적용
+n_samples = len(digits.images)
+data = digits.images.reshape((n_samples, -1))
+
+# svm분류모델 사용, gamma값으로 구분 (gamma : 곡률 경계에 대한 파라미터입니다. 'rbf', 'poly', 'sigmoid'일 때 튜닝하는 값)
+clf = svm.SVC(gamma=0.001)
+
+# train데이터와 text데이터를 5:5로 분리하는 코드
+X_train, X_test, y_train, y_test = train_test_split(
+    data, digits.target, test_size=0.5, shuffle=False
+)
+
+#훈련데이터에서 학습
+clf.fit(X_train, y_train)
+
+#실행(예측)
+predicted = clf.predict(X_test)
+
+
+#이하 테스트샘플 시각화 과정
+_, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
+for ax, image, prediction in zip(axes, X_test, predicted):
+    ax.set_axis_off()
+    image = image.reshape(8, 8)
+    ax.imshow(image, cmap=plt.cm.gray_r, interpolation="nearest")
+    ax.set_title(f"Prediction: {prediction}")
+
+    print(
+    f"Classification report for classifier {clf}:\n"
+    f"{metrics.classification_report(y_test, predicted)}\n"
+)
+
+disp = metrics.ConfusionMatrixDisplay.from_predictions(y_test, predicted)
+disp.figure_.suptitle("Confusion Matrix")
+print(f"Confusion matrix:\n{disp.confusion_matrix}")
+
+plt.show()
+
