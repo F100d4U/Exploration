@@ -1,0 +1,42 @@
+#준비과정
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn.tree import DecisionTreeClassifier
+
+import pandas as pd
+import numpy as np
+
+# 데이터 로드
+wine = load_wine()
+
+#feature 데이터
+wine_data = wine.data
+
+#target 데이터
+wine_target = wine.target
+
+#Dataframe을 만들기
+df_wine = pd.DataFrame(data = wine_data, columns=[wine.feature_names])
+
+# feature만 있는 데이터 프레임에 타겟 데이터 추가
+df_wine['target'] = wine.target
+
+#출력 
+print(df_wine)
+
+#트레인 데이터, 테스트데이터 분할
+x_train, x_test, y_train, y_test = train_test_split(wine_data, wine_target, test_size=0.5, shuffle=False)
+
+#의사결정나무 분류모델, 트레인실행
+decision_tree = DecisionTreeClassifier(random_state=32)
+decision_tree.fit(x_train, y_train)
+
+#테스트 실행
+y_pred = decision_tree.predict(x_test)
+
+#성능평가 : 0.38밖에 안나왔다. 못쓰겠다.
+from sklearn.metrics import accuracy_score
+print(accuracy_score(y_test, y_pred))
+
+
